@@ -1,0 +1,356 @@
+/* .btn-color{
+    /* background: "black" !important; 
+    color: wheat;
+} */
+/* .logo.simple-text.logo-normal.fix-image {
+   max-width: 100%;
+    height: 200px;
+} */
+.scrollbar-container {
+    position: inherit !important;
+}
+
+.sidebar .nav li>a,
+.off-canvas-sidebar .nav li>a {
+    margin: 0px 15px 0 !important;
+}
+
+
+span.fw-bold.new_font {
+    font-size: 13px;
+}
+
+p.my-3.new_font {
+    padding: 4px;
+}
+
+.table_width {
+    width: 100%;
+    border: 1px solid #000;
+}
+
+.table_width tr td {
+    padding: 12px 6px;
+    text-align: center;
+    border: 1px solid #000;
+}
+
+.transactiondate {
+    width: 170px !important;
+    border-radius: 0px !important;
+}
+
+.back_color {
+    background: #000;
+    color: #fff;
+    text-align: center;
+}
+
+img.simple-text.logo-normal.fix-image {
+    height: 160px;
+    margin: 0 auto;
+    width: 210px;
+}
+
+.ps {
+    height: 1000px;
+}
+
+.sidebar .logo,
+.off-canvas-sidebar .logo {
+    width: 100%;
+}
+
+.other {
+    background: #ebecf1 !important;
+}
+
+.sidebar .nav li>a,
+.off-canvas-sidebar .nav li>a {
+    margin: 0 15px 0;
+    padding: 7px 0;
+}
+
+.sidebar .sidebar-wrapper,
+.off-canvas-sidebar .sidebar-wrapper {
+    height: 500px;
+}
+
+
+
+.fix-image {
+    width: 100%;
+    /* height: 200px; */
+    object-fit: contain;
+}
+
+/* .img_width {
+    height: 90px;
+    width: 100%;
+    position: relative;
+    top: -80px;
+} */
+
+.img_width {
+    height: 90px !important;
+    position: relative !important;
+    top: -60px !important;
+    left: 48px !important;
+    width: 80% !important;
+
+}
+
+.justify-content-center.flex-column.d-flex.mx-auto.rounded-3 {
+    background: #fff;
+}
+
+.card .card-body {
+    padding: 0px 15px 10px 15px !important;
+}
+
+.maunt {
+    float: right;
+}
+
+.XlRpR {
+    width: 100% !important;
+}
+
+.password {
+    padding: 0px !important;
+}
+
+.password label {
+    margin-bottom: 6px;
+}
+
+.card-title {
+    font-size: 18px !important;
+}
+
+.export-btn {
+    text-align: right;
+}
+
+.visiablity {
+    margin-left: 20px !important;
+}
+
+.export-btn button {
+    background-color: #f96332 !important;
+}
+
+.card-body.top_spacing {
+    margin-top: 30px;
+}
+
+.table>thead>tr>th {
+    font-size: 1em !important;
+}
+
+.ReactTags__selected span.ReactTags__tag {
+    margin: 0 5px 10px !important;
+}
+
+.row.trade-space {
+    margin-top: 30px;
+}
+
+
+
+
+
+
+@media (max-width: 992px) and (min-width: 768px) {
+    .navbar-expand-lg .navbar-collapse {
+        display: flex !important;
+    }
+
+    .navbar-nav {
+        display: flex;
+        flex-direction: row !important;
+        list-style: none;
+    }
+
+    .profile.dropdown {
+        margin-top: -16px !important;
+    }
+
+    .container-fluid {
+        height: auto !important;
+    }
+
+}
+
+
+@media (max-width: 767px) and (min-width: 425px) {
+    .card label {
+        margin-top: 16px !important;
+    }
+
+    .profile.dropdown {
+        margin-top: -16px !important;
+    }
+
+    .collapse:not(.show) {
+        display: block !important;
+    }
+
+    .navbar-nav {
+        display: block !important;
+        flex-direction: row;
+        position: absolute;
+        right: -4px;
+        right: 0;
+        top: 20px;
+    }
+
+    .bg-light.p-3.rounded-3 {
+        margin-top: 140px !important;
+    }
+
+    #dropdownMenuu {
+        width: 340px !important;
+        height: 400px !important;
+        background-color: #fff;
+        overflow-y: scroll !important;
+        margin: 0px;
+        float: right !important;
+        position: relative;
+        left: 70px !important;
+        top: 20px !important;
+    }
+}
+
+@media (max-width: 424px) and (min-width: 375px) {
+    .profile.dropdown {
+        margin-top: -16px !important;
+    }
+
+    .collapse:not(.show) {
+        display: block !important;
+    }
+
+    .navbar-nav {
+        display: block !important;
+        flex-direction: row;
+        position: absolute;
+        right: 0;
+        top: 20px;
+    }
+
+    .bg-light.p-3.rounded-3 {
+        margin-top: 80px !important;
+    }
+
+    #dropdownMenuu {
+        transform: translate3d(-260px, -29px, 0) !important;
+        width: 340px !important;
+        height: 400px !important;
+        background-color: #fff;
+        overflow-y: scroll !important;
+        margin: 0px;
+        float: right !important;
+        position: relative;
+        left: 50px !important;
+        top: 20px !important;
+    }
+
+}
+
+.w-15 {
+    width: 15% !important;
+}
+
+.form-check input[type="checkbox"],
+.radio input[type="radio"] {
+    position: inherit !important;
+}
+
+.fix-height {
+    height: 328px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    width: 124%;
+}
+
+/* .hover-card :hover{
+    background-color: pink;
+    transition: .3s all linear; 
+} */
+/* .tbl-tradehostory
+{
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url(http://trade.startalgo.com//uploads/startalgo_logo3.png);
+} */
+thead.text-dark.thistory-dark-font tr th {
+    color: #000 !important;
+}
+
+.thistory-dark-font td {
+    background: transparent !important;
+}
+
+
+
+/* my css */
+
+.card-1 {
+    background-color: #ffffff73 !important;
+    padding: 20px !important;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 15px 1px rgb(39 39 39 / 10%) !important;
+    border-radius: 0.1875rem !important;
+    margin-top: 0px !important;
+}
+.login-form .form-control {
+    background-color: #fdf9f9;
+}
+.forgot-link
+{color: #014262;
+    font-weight: 700;
+}
+.mb10 {
+    margin-bottom: 10px;
+}
+
+.box-center {
+    background-color: #e5e9ec;
+    /*display: flex;
+    align-items: center;*/
+    padding-top: 60px;
+    height: 100vh;
+}
+
+
+.hidebg {
+    border-style: hidden;
+}
+
+.hidebg:focus {
+    outline: none;
+}
+
+.hidebg::-webkit-outer-spin-button,
+.hidebg::-webkit-inner-spin-button {
+    display: none;
+}
+.css-1nmdiq5-menu
+{
+    background-color: #fff !important;
+    position: relative;
+    z-index: 9999 !important;
+}
+
+.themetabsdiv input{
+    color: #000;
+    width: 100%;
+    font-size: 18px;
+    line-height: 23px;
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 5px;
+}

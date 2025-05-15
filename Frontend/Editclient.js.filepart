@@ -1,0 +1,804 @@
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { WithContext as ReactTags } from "react-tag-input";
+import { useForm } from "react-hook-form";
+import { Form } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import * as Constant from "../common/ConstantMessage";
+import AlertToast from "../common/AlertToast";
+import Modal from 'react-bootstrap/Modal';
+import * as Config from "../common/Config";
+import { NavLink, useNavigate } from "react-router-dom";
+import { dateFormate } from "../common/CommonDateFormate";
+import { maskEmail, maskNumber } from "../common/HideWithStar";
+
+function Editclient() {
+
+  const navigate = useNavigate();
+  const g_id = useParams();
+  const [userdata, setUserdata] = useState("");
+  // console.log("userdata", userdata);
+  const [strategy, setStrategy] = useState([]);
+  const [cstrategy, setcStrategy] = useState([]);
+  // console.log("cstrategy", cstrategy);
+  const [group, setGroup] = useState([]);
+  const [cgroup, setcGroup] = useState([]);
+  const [addmonth, setAddmonth] = useState(0);
+  const [licencetype, setLicenceType] = useState('');
+  const [forPermission, setForPermission] = useState([])
+  // console.log("forPermission", forPermission);
+  // console.log("addmonth", typeof addmonth);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const [subadmin, setSubadmin] = useState([]);
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+  const [toggleSwitch, setToggleSwitch] = useState(true);
+  const [groupServices, setGroupServices] = useState("");
+  // console.log("groupServices", groupServices);
+  const [showAlert, setShowAlert] = useState(false);
+  const [textAlert, setTextAlert] = useState("");
+  const [alertColor, setAlertColor] = useState("");
+  const [strategyError, setStrategyError] = useState("");
+  const [liveBrokerErr, setLivebrokerErr] = useState("");
+  const [GroupErr, setGroupErr] = useState("");
+  const [strategyClickError, setStrategyClickError] = useState("");
+  const [userdataLicenceType, setUserdataLicenceType] = useState("");
+  const [editBrokerId, setEditBrokerId] = useState(100)
+  const [oneTimeEditEmail, setOneTimeEditEmail] = useState("")
+  const [notChangeBroker, setNotChangeBroker] = useState("")
+  const [nextMonth, setNextMonth] = useState("");
+  const [ButtonDisabled, setButtonDisabled] = useState(false);
+  const [showServiceMonthGiven, setShowServiceMonthGiven] = useState("");
+
+  const [category, setCategories] = useState([]);
+
+  const [selcategory, setselCategories] = useState([]);
+  const [cservices, setCservices] = useState([]);
+  // console.log("responseedtaaa", cservices);
+  const [selectall, setSelectall] = useState("");
+  const [serachServices, setSearchServices] = useState([]);
+  // const [tags1, setServiceData] = useState([]);
+  const [serviceData, setServiceData] = useState("")
+  const [twoDaysService, setTwoDaysService] = useState("")
+  // console.log("twoDaysService -", twoDaysService);
+
+  const [subadminStrategyApi, setSubadminStrategyApi] = useState([])
+
+  const handleClickDisabled = () => {
+    setButtonDisabled(true);
+  }
+
+
+  //Not to Delete---------------------------------------
+  // const [emptyService, setEmptyService] = useState()
+  // const [groupname, setgroupname] = useState("");
+  // const [groupNameErr, setgroupNameErr] = useState("");
+  // const [catagoryErr, setCatagoryErr] = useState("");
+  //-----------------------------------------------------------
+
+  var roleId = localStorage.getItem('roleId');
+  const admin_token = localStorage.getItem("token");
+  const client_id = localStorage.getItem("client_id");
+  const adminId = localStorage.getItem("adminId");
+  const fromadmin = localStorage.getItem('from_admin');
+  const fromsubadmin = localStorage.getItem('from_subadmin');
+  const role_id = localStorage.getItem('roleId');
+
+  //------------------------------------------------
+  const handleChange = (e) => {
+    setselCategories(e.target.value);
+    if (e.target.value == "") {
+      setCservices([]);
+      return false;
+    }
+    axios({
+      method: "post",
+      url: `${Config.base_url}smartalgo/services`,
+      data: { adminId: adminId, id: e.target.value },
+      headers: {
+        'x-access-token': admin_token
+      }
+    }).then(function (response) {
+      // console.log("responseedtaaa", response);
+      setCservices(response.data.services);
+      setSearchServices(response.data.services);
+      setSelectall("");
+    });
+  };
+
+
+  const handleClick = (e) => {
+    var id = e.target.value;
+    var append_tag = cservices.filter((tag, index) => tag.id == id);
+    if (e.target.checked) {
+      var pre_tag = {
+        id: "" + append_tag[0].id + "",
+        text: append_tag[0].service,
+        cat_id: selcategory,
+      };
+      setServiceData((oldArray) => [...oldArray, pre_tag]);
+    } else {
+      setSelectall("");
+      setServiceData(serviceData.filter((tag, index) => tag.id !== id));
+    }
+  };
+
+  const handleSelect = (e) => {
+    if (e.target.checked) {
+      var old_tags = serviceData.map((tag) => "" + tag.id + "");
+      cservices.map((tag) => {
+        if (!old_tags.includes("" + tag.id + "")) {
+          setServiceData((oldArray) => [
+            ...oldArray,
+            { id: "" + tag.id + "", text: tag.service, cat_id: selcategory },
+          ]);
+        }
+      });
+      setSelectall("minus");
+    } else {
+      var service_array = cservices.map((tag) => "" + tag.id + "");
+      var new_tag = serviceData.filter((tag, index) => {
+        if (!service_array.includes("" + tag.id + "")) {
+          return tag;
+        }
+      });
+      setSelectall("");
+      setServiceData(new_tag);
+      // console.log("tagggg",new_tag);
+
+    }
+  };
+
+  var updatedServices = [];
+
+  const checkitem = (r) => {
+    // console.log("r", r);
+    var match = serviceData.map((res) => {
+      if (res.length != 0) {
+        if (res.id == r) {
+
+          updatedServices.push(res.id);
+          //var serviceUpdat = res.id
+          // console.log("dddd", serviceUpdat)
+
+          return res
+        } else {
+          return "";
+        }
+      } else {
+        return "";
+      }
+    });
+
+    // var arrOfNum = updatedServices.map(str => {
+    //   return Number(str);
+    // });
+
+    //  console.log("rrr", arrOfNum);
+
+    var filtered = match.filter(function (el) {
+      return el != null && el != "";
+    });
+
+    if (filtered.length != 0) {
+      return "minus";
+    } else {
+      return "";
+    }
+  };
+
+  const searchServices = (e) => {
+    var searchServ = serachServices.filter((item) => {
+      if (
+        item.service
+          .toString()
+          .includes(e.target.value.toString().toUpperCase())
+      ) {
+        return item;
+      }
+    });
+    setCservices(searchServ);
+  };
+
+  const handleDelete = (i, ctag) => {
+
+    var c_id = ctag[i].id;
+    // console.log("c_id", c_id);
+    setServiceData(serviceData.filter((tag, index) => tag.id != c_id));
+  };
+
+  const selectcategory = () => {
+    axios.get(`${Config.base_url}smartalgo/category`, {
+      headers: {
+        'x-access-token': admin_token
+      }, data: {}
+    }).then((res) => {
+      // console.log("category", res.data.category);
+      setCategories(res.data.category);
+
+    });
+  }
+  //------------------------------------------------
+
+  const Data = [
+    {
+      id: 100,
+      HeadingTitle: `No Data`
+    },
+    {
+      id: 1,
+      HeadingTitle: `<div><h1>Alice Blue</h1><b>API Process Alice Blue: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p> <b>Step 1:- </b> Click below Link and Login </br>` + `<a href='https://ant.aliceblueonline.com/?appcode=G9EOSWCEIF9ARCB' target='_blank'>https://ant.aliceblueonline.com/?appcode=G9EOSWCEIF9ARCB</a>` + ` <br><br><b>Step 2:- </b>Click below Link and Login </br>` + `<a href=${Config.broker_redirect_url}aliceblue/access_token?email=YOUR_PANEL_EMAIL target='_blank'> ${Config.broker_redirect_url}aliceblue/access_token?email=YOUR_PANEL_EMAIL</a>` + ` <br><br><b>Example </b><p>e.g -${Config.broker_redirect_url}aliceblue/access_token?email=ss@gmail.com </p><b></br> Step 3 :- Create Api </b><p>you will get Api Secret Key And App code please Update this detail in your Profile...</p></div>`
+    },
+    {
+      id: 2,
+      HeadingTitle: `<div><h1>Zerodha</h1><b>API Process Zerodha: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p> <b>Step 1:- </b> Click below Link and Login </br>` + `<a href='https://kite.trade/' target='_blank'>https://kite.trade/</a>` + ` <br><br><b>Step 2:- </b>Click below Link and Login </br>` + `<a href=${Config.broker_redirect_url}zerodha/access_token?email=YOUR_PANEL_EMAIL target='_blank'> ${Config.broker_redirect_url}zerodha/access_token?email=YOUR_PANEL_EMAIL</a>` + ` <br><br><b>Example </b><p>e.g -${Config.broker_redirect_url}zerodha/access_token?email=ss@gmail.com </p><b></br> Step 3 :- Create Api </b><p>you will get Api Secret Key And App code please Update this detail in your Profile...</p></div>`
+    },
+    {
+      id: 3,
+      HeadingTitle: `<div><h1>Zebull</h1><b>API Process Zebull: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p></div>`
+    },
+    {
+      id: 5,
+      HeadingTitle: `<div><h1>5 Paisa</h1><b>API Process 5 Paisa: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p> <b>Step 1:- </b> Click below Link and Login ` + `<a href='https://invest.5paisa.com/DeveloperAPI/APIKeys' target='_blank'>https://invest.5paisa.com/DeveloperAPI/APIKeys</a><div>`
+    },
+    {
+      id: 9,
+      HeadingTitle: `<div><h1>Market Hub</h1><b>API Process Market Hub: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p></div>`
+    },
+    {
+      id: 4,
+      HeadingTitle: `<div><h1>Angel</h1><b>API Process Angel: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p> <b>Step 1:- </b> Click below Link and Login </br>` + `<a href='https://smartapi.angelbroking.com/' target='_blank'>https://smartapi.angelbroking.com/</a>` + ` <br><br><b>Step 2:- </b>Click below Link and Login </br>` + `<a href=${Config.broker_redirect_url}angelbroking/access_token?email=YOUR_PANEL_EMAIL target='_blank'> ${Config.broker_redirect_url}angelbroking/access_token?email=YOUR_PANEL_EMAIL</a>` + ` <br><br><b>Example </b><p>e.g -${Config.broker_redirect_url}angelbroking/access_token?email=ss@gmail.com </p><b></br> Step 3 :- Create Api </b><p>you will get Api Secret Key And App code please Update this detail in your Profile...</p></div>`
+    },
+    {
+      id: 10,
+      HeadingTitle: `<div><h1>Master Trust</h1><b>API Process Master Trust: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p> <b>Step 1:- </b> Click below Link and Login </br>` + `<a href='https://develop-masterswift.mastertrust.co.in/' target='_blank'>https://develop-masterswift.mastertrust.co.in/</a>` + ` <br><br><b>Step 2:- </b>Click below Link and Login </br>` + `<a href=${Config.broker_redirect_url}mastertrust/access_token target='_blank'> ${Config.broker_redirect_url}mastertrust/access_token</a>` + ` <br><br><b></br> Step 3 :- Create Api </b><p>you will get Api Secret Key And App code please Update this detail in your Profile...</p></div>`
+    },
+    {
+      id: 6,
+      HeadingTitle: `<div><h1>Fyers</h1><b>API Process Fyers: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p> <b>Step 1:- </b> Click below Link and Login </br>` + `<a href='https://myapi.fyers.in/dashboard/' target='_blank'>https://myapi.fyers.in/dashboard/</a>` + ` <br><br><b>Step 2:- </b>Click below Link and Login </br>` + `<a href=${Config.broker_redirect_url}fyers/access_token target='_blank'> ${Config.broker_redirect_url}fyers/access_token</a>` + ` <br><br><b></br> Step 3 :- Create Api </b><p>you will get Api Secret Key And App code please Update this detail in your Profile...</p></div>`
+    },
+    {
+      id: 11,
+      HeadingTitle: `<div><h1>B2C</h1><b>API Process B2C: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p></div>`
+    },
+    {
+      id: 7,
+      HeadingTitle: `<div><h1>Indira</h1><b>API Process Indira: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p></div>`
+    },
+    {
+      id: 8,
+      HeadingTitle: `<div><h1>Trade Smart</h1><b>API Process Trade Smart: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p></div>`
+    },
+    {
+      id: 12,
+      HeadingTitle: `<div><h1>Motilal Oswal</h1><b>API Process Motilal Oswal: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p></div>`
+    },
+    {
+      id: 13,
+      HeadingTitle: `<div><h1>Anand Rathi</h1><b>API Process Anand Rathi: -</b> <p>Please Update SECRET KEY And APP KEY for all these details please contact with Anand Rathi broker then Submit  And  Login With Api Trading On...</p></div>`
+    },
+    {
+      id: 14,
+      HeadingTitle: `<div><h1>Choice</h1><b>API Process Choice: -</b> <p>Please Update VENDOR ID, PASSWORD, VENDOR KEY, ENCRYPTION SECRET KEY And ENCRYPTION IV for all these details please contact with Choice broker then Submit  And  Login With Api Trading On...</p></div>`
+    },
+    {
+      id: 15,
+      HeadingTitle: `<div><h1>Mandot</h1><b>API Process Mandot: -</b> <p>Please Update USERNAME And PASSWORD for all these details please contact with Mandot broker then Submit  And  Login With Api Trading On...</p></div>`
+    },
+    {
+      id: 16,
+      HeadingTitle: `<div><h1>Kotak</h1><b>API Process Kotak: -</b> <p>Please Update ACCESS TOKEN, PASSWORD, CLIENT CODE And CONSUMER KEY for all these details please contact with Kotak broker then Submit  And  Login With Api Trading On...</p></div>`
+    },
+    {
+      id: 18,
+      HeadingTitle: `<div><h1>IIFL</h1><b>API Process IIFL: -</b> <p>Please Update USERNAME And PASSWORD for all these details please contact with IIFL broker then Submit  And  Login With Api Trading On...</p></div>`
+    },
+    {
+      id: 19,
+      HeadingTitle: `<div><h1>Arihant</h1><b>API Process Arihant: -</b> <p>Kindly click on below mention brokerage firm link it will redirect to your concern brokerage API link and generate API with this. Kindly follow instruction as your broker or sub broker link guide to you and update our link and connect your demat with our Algo software.</p></div>`
+    },
+  ];
+
+  const editUserFilter = Data.filter(val => {
+    if (val.id == editBrokerId && editBrokerId) {
+      return val
+    }
+  })
+  // console.log("edit", editUserFilter);
+
+
+  var month = [];
+  if (userdataLicenceType == 2) {
+    for (var i = 0; i <= 1; i++) {
+      month.push(i);
+    }
+  } else if (userdataLicenceType == 1) {
+    for (var i = 1; i <= 12; i++) {
+      month.push(i);
+    }
+  }
+
+  const getPermissions = () => {
+    axios({
+      method: "post",
+      url: `${Config.base_url}subadmins/get`,
+      data: {
+        userId: adminId,
+      },
+    }).then(function (response) {
+      // console.log("response", response.data.subadmins);
+      setForPermission(response.data.subadmins[0])
+    });
+  }
+
+  const getSubAdminStrategy = () => {
+    axios({
+      method: "post",
+      url: `${Config.base_url}admin/subadmin/strategy`,
+      data: {
+        SubadminId: adminId,
+        // SubadminId : SubadminId
+      },
+      headers: {
+        'x-access-token': admin_token
+      }
+    }).then(function (res) {
+      // console.log("res", res);
+      setSubadminStrategyApi(res.data.Strategy)
+    });
+  }
+
+  // console.log('userdata -',g_id)
+
+  useEffect(() => {
+
+    axios({
+      method: "post",
+      url: `${Config.base_url}admin/client`,
+      data: { 'adminId': adminId, id: g_id.status },
+      headers: {
+        'x-access-token': admin_token
+      }
+    }).then(function (response) {
+      console.log("responseget", response);
+      setLicenceType(response.data.userdata[0].licence_type)
+      setTwoDaysService(response.data.userdata[0].twoday_service)
+      setNotChangeBroker(response.data.userdata[0].not_change_broker)
+      setOneTimeEditEmail(response.data.userdata[0].email_edit)
+      setUserdataLicenceType(response.data.userdata[0].licence_type);
+      setUserdata(response.data.userdata[0]);
+      let dateStart = new Date(response.data.userdata[0].start_date);
+      setStartDate(dateStart);
+      let dateEnd = new Date(response.data.userdata[0].end_date);
+      setEndDate(dateEnd);
+      setcStrategy(response.data.cstrategy);
+
+      // console.log("strategyyyyyy", response.data.cstrategy);
+      if (response.data.cgroup.length != 0) {
+        setcGroup(response.data.cgroup[0].group_id);
+        groupServiceApi(response.data.cgroup[0].group_id);
+      }
+    });
+
+    axios.get(`${Config.base_url}admin/strategy`, {
+      headers: {
+        'x-access-token': admin_token
+      }, data: {}
+    }).then((res) => {
+      // const removeFirstIndex = (res.data.strategy.shift())
+      setStrategy(res.data.strategy);
+    });
+    axios.get(`${Config.base_url}admin/sub-admins`, {
+      headers: {
+        'x-access-token': admin_token
+      }, data: {}
+    }).then((res) => {
+      setSubadmin(res.data.subadmins);
+    });
+    axios.get(`${Config.base_url}admin/group-services`, {
+      headers: {
+        'x-access-token': admin_token
+      }, data: {}
+    }).then((res) => {
+      setGroup(res.data.services);
+      // setServiceData(res.data.service);
+    });
+
+    axios({
+      method: "post",
+      url: `${Config.base_url}admin/get-all-services`,
+      data: { 'client_id': g_id },
+      headers: {
+        'x-access-token': admin_token
+      }
+    }).then((res) => {
+      // console.log("datares", res.data.services);
+      setServiceData(res.data.services)
+      // var groupServicesId = res.data.services.map((services) => {
+      //   setServiceData(services.service_id)
+      //   return groupServicesId
+      // })
+    });
+
+    selectcategory()
+    getPermissions()
+    getSubAdminStrategy()
+  }, []);
+
+  const checkbroker = (i) => {
+    // console.log("smartalgo checkbok ,", i)
+    if (i == userdata.broker) {
+      return "checked";
+    } else {
+      return "";
+    }
+  };
+
+  const onAlertClose = (e) => {
+    setShowAlert(false);
+  };
+  // console.log("userdata" , userdata);
+  const inputChange = (e) => {
+    // setLivebrokerErr('')
+    // if (e.target.name == "full_name") {
+    //   setUserdata((prevState) => ({
+    //     ...prevState,
+    //     ["full_name"]: e.target.value,
+    //   }));
+    // }
+
+    if (e.target.name == "email") {
+      setUserdata((prevState) => ({ ...prevState, ["email"]: e.target.value }));
+    }
+
+    // if (e.target.name == "mobile") {
+    //   setUserdata((prevState) => ({
+    //     ...prevState,
+    //     ["mobile"]: e.target.value,
+    //   }));
+    // }
+
+    if (e.target.name == "broker") {
+      setEditBrokerId(e.target.value)
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["broker"]: e.target.value,
+      }));
+
+      // console.log("brokerid", e.target.value);
+    }
+    if (e.target.name == "api_key") {
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["api_key"]: e.target.value,
+      }));
+    }
+    if (e.target.name == "api_secret") {
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["api_secret"]: e.target.value,
+      }));
+    }
+    if (e.target.name == "app_id") {
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["app_id"]: e.target.value,
+      }));
+    }
+    if (e.target.name == "client_code") {
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["client_code"]: e.target.value,
+      }));
+    }
+    if (e.target.name == "api_type") {
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["api_type"]: e.target.value,
+      }));
+    }
+    if (e.target.name == "demat_userid") {
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["demat_userid"]: e.target.value,
+      }));
+    }
+    if (e.target.name == "licence_type") {
+      if (e.target.value == 1) {
+        setUserdata(prevState => ({ ...prevState, ['broker']: '' }));
+        setAddmonth(0)
+        // setLivebrokerErr('')
+      }
+      if (e.target.value == 2) {
+        setAddmonth(1)
+      }
+
+      setUserdata((prevState) => ({
+        ...prevState,
+        ["licence_type"]: e.target.value,
+      }));
+    }
+    if (e.target.name == "addmonth") {
+      setAddmonth(e.target.value);
+    }
+  };
+
+  const checkstrategy = (id) => {
+    if (cstrategy.includes(id)) {
+      return "minus";
+    } else {
+      return "";
+    }
+  };
+
+  const strategyClick = (e) => {
+    // console.log("e", e.target.value);
+    var name = e.target.value;
+
+    if (e.target.checked) {
+      setcStrategy([...cstrategy, name]);
+      setStrategyClickError("")
+    } else {
+      setcStrategy(cstrategy.filter((tag, index) => tag != "" + name + ""));
+      setStrategyClickError("")
+    }
+  };
+
+  const subadminChange = (e) => {
+    setUserdata((prevState) => ({
+      ...prevState,
+      ["subadmin_id"]: e.target.value,
+    }));
+  };
+
+  const groupServiceApi = (groupId) => {
+    if (groupId !== "") {
+      axios({
+        method: "post",
+        url: `${Config.base_url}admin/group-services`,
+        data: { 'adminId': adminId, id: groupId },
+        headers: {
+          'x-access-token': admin_token
+        }
+      }).then(function (response) {
+        setGroupServices(response.data.service);
+        // setServiceData(response.data.service);
+      });
+    }
+  };
+
+  const groupChange = (e) => {
+    // console.log("e.target.value", e.target.value);
+    setcGroup(e.target.value);
+    groupServiceApi(e.target.value);
+  };
+  const brokerhtml = () => {
+    switch (userdata.broker) {
+      case "1":
+        return (
+          <>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>SECRET KEY</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+                    }}
+                    value={userdata.api_secret}
+                    name="api_secret"
+                    className="form-control"
+                    disabled={notChangeBroker === 0 ? false : true}
+                  />
+                </div>
+              </div>
+              <div className="col-md-3"></div>
+            </div>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>APP ID</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+                    }}
+                    value={userdata.app_id}
+                    name="app_id"
+                    className="form-control"
+                    disabled={notChangeBroker === 0 ? false : true}
+                  />
+                </div>
+              </div>
+              <div className="col-md-3"></div>
+            </div>
+          </>
+        );
+      case "2":
+        return (
+          <>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>API KEY</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+                    }}
+                    value={userdata.api_key}
+                    name="api_key"
+                    className="form-control"
+                    disabled={notChangeBroker === 0 ? false : true}
+                  />
+                </div>
+              </div>
+              <div className="col-md-3"></div>
+            </div>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>API SECRET KEY</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+                    }}
+                    value={userdata.api_secret}
+                    name="api_secret"
+                    className="form-control"
+                    disabled={notChangeBroker === 0 ? false : true}
+                  />
+                </div>
+              </div>
+              <div className="col-md-3"></div>
+            </div>
+          </>
+        );
+      case "3":
+        return (
+          <>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>User Id</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+                    }}
+                    value={userdata.client_code}
+                    name="client_code"
+                    className="form-control"
+                    disabled={notChangeBroker === 0 ? false : true}
+                  />
+                </div>
+              </div>
+              <div className="col-md-3"></div>
+            </div>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>Password</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+                    }}
+                    value={userdata.app_id}
+                    name="app_id"
+                    className="form-control"
+                    disabled={notChangeBroker === 0 ? false : true}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-md-3"></div>
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label>APP Key</label>
+                    <input
+                      type="text"
+                      onChange={(e) => {
+                        inputChange(e);
+                      }}
+                      value={userdata.api_key}
+                      name="api_key"
+                      className="form-control"
+                      disabled={notChangeBroker === 0 ? false : true}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-3"></div>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>DOB</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+                    }}
+                    value={userdata.api_secret}
+                    name="api_secret"
+                    className="form-control"
+                    placeholder="example:- 15-08-1947"
+                    disabled={notChangeBroker === 0 ? false : true}
+                  />
+                </div>
+              </div>
+              <div className="col-md-3"></div>
+            </div>
+          </>
+          // <>
+          //   <div className="row">
+          //     <div className="col-md-3"></div>
+          //     <div className="col-md-6">
+          //       <div className="form-group">
+          //         <label>API KEY</label>
+          //         <input
+          //           type="text"
+          //           onChange={(e) => {
+          //             inputChange(e);
+          //           }}
+          //           value={userdata.api_key}
+          //           name="api_key"
+          //           className="form-control"
+          //           disabled={notChangeBroker === 0 ? false : true}
+          //         />
+          //       </div>
+          //     </div>
+          //     <div className="col-md-3"></div>
+          //   </div>
+          //   <div className="row">
+          //     <div className="col-md-3"></div>
+          //     <div className="col-md-6">
+          //       <div className="form-group">
+          //         <label>APP ID</label>
+          //         <input
+          //           type="text"
+          //           onChange={(e) => {
+          //             inputChange(e);
+          //           }}
+          //           value={userdata.app_id}
+          //           name="app_id"
+          //           className="form-control"
+          //           disabled={notChangeBroker === 0 ? false : true}
+          //         />
+          //       </div>
+          //     </div>
+          //     <div className="col-md-3"></div>
+          //   </div>
+          // </>
+        );
+      case "4":
+        return (
+          <>
+            <div className="row">
+              <div className="col-md-3"></div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>API KEY</label>
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      inputChange(e);
+        
