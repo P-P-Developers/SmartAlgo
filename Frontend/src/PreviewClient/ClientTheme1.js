@@ -304,10 +304,7 @@ const ClientTheme1 = () => {
         });
     }
 
-    const isAuthenticated = localStorage.getItem("client_token");
-    if (isAuthenticated) {
-        return <Navigate to="/client/services" />;
-    }
+
 
     const toggle = (e) => {
         e.preventDefault();

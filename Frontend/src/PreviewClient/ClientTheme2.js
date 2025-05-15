@@ -301,9 +301,7 @@ const ClientTheme2 = () => {
         return <Navigate to="/" />;
     }
 
-    // if (isAuthenticated) {
-    //     // return <Navigate to="/client/services" />;
-    // }
+  
 
     const toggle = (e) => {
         e.preventDefault();
